@@ -1,0 +1,1597 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeFix Pro - Dịch vụ sửa chữa nhà chuyên nghiệp</title>
+<style>
+    :root {
+        --primary-color: #2657c1;
+        --secondary-color: #001f61;
+        --accent-color: #ea7b8e;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .image-with-overlay {
+        position: relative;
+        width: 100%;
+        height: 450px;
+        overflow: hidden;
+    }
+
+    .image-with-overlay img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.3); /* Darkened slightly */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .overlay-content {
+        color: #ffffff;
+        text-align: center;
+        padding: 2rem;
+        max-width: 800px;
+    }
+
+    .overlay-content h3 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .overlay-content h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .overlay-content p {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+    }
+    
+    .logo span {
+        color: var(--accent-color);
+    }
+    
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+    }
+    
+    .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    
+    .nav-links a:hover, .nav-links a.active {
+        background-color: var(--secondary-color);
+    }
+    
+    .hero {
+        color: white;
+        text-align: center;
+    }
+    
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto 2rem;
+    }
+    
+    .btn {
+        display: inline-block;
+        background-color: var(--accent-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+        background-color: #d66a7c;
+    }
+    
+    .btn-primary {
+        background-color: var(--accent-color);
+    }
+    
+    .btn-secondary {
+        background-color: var(--primary-color);
+    }
+    
+    .section {
+        padding: 4rem 0;
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: var(--dark-color);
+    }
+    
+    .section-title h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-title p {
+        color: #777;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .technician-list {
+        display: none;
+        margin-top: 2rem;
+    }
+    
+    .technician-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .technician-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #eee;
+    }
+    
+    .technician-info {
+        flex: 1;
+    }
+    
+    .technician-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .technician-experience {
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .technician-services {
+        margin-bottom: 0.5rem;
+    }
+    
+    .technician-rating {
+        color: var(--warning-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .star {
+        color: var(--warning-color);
+    }
+    
+    .price-highlight {
+        display: inline-block;
+        background-color: #fffae6;
+        border: 2px solid var(--warning-color);
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0.5rem 0;
+        text-align: left; /* Aligned to left */
+    }
+    
+    .booking-form {
+        display: none;
+        margin-top: 2rem;
+    }
+    
+    .technician-detail {
+        display: none;
+        margin-top: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+    
+    .technician-detail-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .technician-detail-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+        background-color: #eee;
+    }
+    
+    .technician-detail-title h3 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .technician-detail-body {
+        padding: 2rem;
+    }
+    
+    .technician-detail-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .technician-detail-section h4 {
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        color: var(--dark-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .technician-review {
+        background-color: var(--light-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .technician-review-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .technician-review-name {
+        font-weight: 600;
+    }
+    
+    .technician-review-date {
+        color: #777;
+        font-size: 0.9rem;
+    }
+    
+    .technician-cta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+    
+    .service-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.3s;
+    }
+
+    .service-card:hover{
+        transform: translateY(-10px);
+    }
+    
+    .service-img {
+        height: 200px;
+        width: 100%;
+        background-color: #eee;
+    }
+    
+    .service-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .service-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+    
+    .service-content h3 {
+        margin-bottom: 1rem;
+        color: var(--dark-color);
+        font-size: 1.5rem;
+    }
+    
+    .service-content p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+    
+    .service-content ul {
+        margin-top: 1rem;
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+    
+    .service-button {
+        text-align: center;
+        padding: 0 1.5rem 1.5rem;
+    }
+    
+    .about-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+    
+    .about-image {
+        height: 400px;
+        background-color: #eee;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .about-text h3 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--dark-color);
+    }
+    
+    .mission-vision {
+        margin-top: 4rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 2rem;
+    }
+    
+    .mission-vision-flex {
+        display: flex;
+        gap: 2rem;
+    }
+    
+    .mission-box, .vision-box, .values-box {
+        flex: 1;
+        padding: 2rem;
+        border-radius: 8px;
+    }
+    
+    .mission-box {
+        background-color: var(--light-color);
+    }
+    
+    .vision-box {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .values-box {
+        background-color: var(--dark-color);
+        color: white;
+    }
+    
+    .core-values {
+        margin-top: 4rem;
+    }
+    
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .value-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: hsl(2, 95%, 34%);
+        border: 1px solid #ffeeba;
+    }
+    
+    infra {
+        background-color: var(--dark-color);
+        color: white;
+        padding: 3rem 0 1.5rem;
+    }
+    
+    footer {
+        background-color: var(--dark-color);
+        color: white;
+        padding: 3rem 0 1.5rem;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .footer-column h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        color: var(--light-color);
+    }
+    
+    .footer-links {
+        list-style: none;
+    }
+    
+    .footer-links li {
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-links a {
+        color: #bbb;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+        color: white;
+    }
+    
+    .copyright {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid #444;
+        color: #bbb;
+    }
+    
+    .page-content {
+        display: none;
+    }
+    
+    #home-page {
+        display: block;
+    }
+    
+    .floating-buttons {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 99;
+    }
+
+    .floating-button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+    }
+
+    .floating-button:hover {
+        transform: scale(1.1);
+    }
+
+    .messenger-button {
+        background-color: #ecf0f1;
+    }
+
+    .zalo-button {
+        background-color: #ecf0f1;
+    }
+
+    .floating-button img {
+        width: 30px;
+        height: 30px;
+    }
+    
+    @media (max-width: 768px) {
+        .services-grid, .values-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .about-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .mission-vision-flex {
+            flex-direction: column;
+        }
+        
+        .footer-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .technician-detail-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .image-with-overlay {
+            height: 300px;
+        }
+
+        .overlay-content h3 {
+            font-size: 2rem;
+        }
+
+        .overlay-content h1 {
+            font-size: 2.5rem;
+        }
+
+        .overlay-content p {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="floating-buttons">
+    <a href="https://www.facebook.com/messages/e2ee/t/29281478601496059" target="_blank" class="floating-button messenger-button">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Facebook_Messenger_logo_2020.svg/1200px-Facebook_Messenger_logo_2020.svg.png" alt="Messenger">
+    </a>
+    <a href="https://zalo.me/0825181939" target="_blank" class="floating-button zalo-button">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1200px-Icon_of_Zalo.svg.png" alt="Zalo">
+    </a>
+</div>
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo">
+                HomeFix<span>Pro</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" onclick="showPage('home-page')">Trang chủ</a></li>
+                <li><a href="#" onclick="showPage('about-page')">Về chúng tôi</a></li>
+                <li><a href="#" onclick="showPage('services-page')">Dịch vụ</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div id="home-page" class="page-content">
+    <section class="hero">
+        <div class="image-with-overlay">
+            <img src="https://lh3.googleusercontent.com/KqNtDg6qsDIqjPmfsICJnmWJQPO8SUACkdkyh-C2rNW61L-ByQhA6yi-Z0jOUf7eGG2nyDKOdvqKRK0eJrRPFtUbS-TZ4-TCVA" alt="Đội ngũ kỹ thuật viên chuyên nghiệp đang làm việc">
+            <div class="image-overlay">
+                <div class="overlay-content">
+                    <h3>Đội ngũ chuyên nghiệp của chúng tôi</h3>
+                    <p>Tất cả các kỹ thuật viên của chúng tôi đều là những chuyên gia được chứng nhận với nhiều năm kinh nghiệm trong lĩnh vực của họ. Chúng tôi đảm bảo chất lượng công việc cho mỗi dự án.</p>
+                    <a href="#booking-section" class="btn btn-primary">Đặt kỹ thuật viên ngay</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="booking-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Đặt kỹ thuật viên</h2>
+                <p>Hãy cho chúng tôi biết bạn cần hỗ trợ gì, chúng tôi sẽ kết nối bạn với chuyên gia phù hợp tại khu vực của bạn.</p>
+            </div>
+            
+            <div id="alert-container"></div>
+            
+            <div class="form-card">
+                <form id="service-form">
+                    <div class="form-group">
+                        <label for="service-type">Bạn cần loại dịch vụ nào?</label>
+                        <select id="service-type" class="form-control" required onchange="updateDetailedServices()">
+                            <option value="" selected disabled>Chọn loại dịch vụ</option>
+                            <option value="electrical">Sửa chữa điện</option>
+                            <option value="plumbing">Sửa chữa ống nước</option>
+                            <option value="electro">Điện lạnh</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailed-service">Chọn dịch vụ chi tiết</label>
+                        <select id="detailed-service" class="form-control" required onchange="selectDetailedService()">
+                            <option value="" selected disabled>Chọn dịch vụ chi tiết</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="district">Chọn khu vực của bạn</label>
+                        <select id="district" class="form-control" required>
+                            <option value="" selected disabled>Chọn khu vực</option>
+                            <option value="district1">Quận 1</option>
+                            <option value="district3">Quận 3</option>
+                            <option value="district4">Quận 4</option>
+                            <option value="district5">Quận 5</option>
+                            <option value="district6">Quận 6</option>
+                            <option value="district7">Quận 7</option>
+                            <option value="district8">Quận 8</option>
+                            <option value="district10">Quận 10</option>
+                            <option value="district11">Quận 11</option>
+                            <option value="district12">Quận 12</option>
+                            <option value="districtTDuc">Thành phố Thủ Đức</option>
+                            <option value="districtBThanh">Quận Bình Thạnh</option>
+                            <option value="districtTPhu">Quận Tân Phú</option>
+                            <option value="districtTBinh">Quận Tân Bình</option>
+                            <option value="districtBTan">Quận Bình Tân</option>
+                            <option value="districtGVap">Quận Gò Vấp</option>
+                            <option value="districtPNhuan">Quận Phú Nhuận</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" onclick="findTechnicians()">Tìm kỹ thuật viên</button>
+                </form>
+            </div>
+            
+            <div id="technician-list" class="technician-list">
+                <h3>Kỹ thuật viên sẵn sàng</h3>
+            </div>
+            
+            <div id="technician-detail" class="technician-detail">
+            </div>
+            
+            <div id="booking-form" class="booking-form form-card">
+                <h3>Hoàn tất đặt lịch</h3>
+                <form id="contact-form">
+                    <div class="form-group">
+                        <label for="name">Tên của bạn</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Địa chỉ</label>
+                        <textarea id="address" class="form-control" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Ngày mong muốn</label>
+                        <input type="date" id="date" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Thời gian mong muốn</label>
+                        <select id="time" class="form-control" required>
+                            <option value="" selected disabled>Chọn thời gian</option>
+                            <option value="morning">Sáng (8:00 - 12:00)</option>
+                            <option value="afternoon">Chiều (12:00 - 16:00)</option>
+                            <option value="evening">Tối (16:00 - 20:00)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Ghi chú thêm</label>
+                        <textarea id="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" onclick="completeBooking()">Hoàn tất đặt lịch</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="services-page" class="page-content">
+    <section class="hero">
+        <div class="image-with-overlay">
+            <img src="https://lh3.googleusercontent.com/KqNtDg6qsDIqjPmfsICJnmWJQPO8SUACkdkyh-C2rNW61L-ByQhA6yi-Z0jOUf7eGG2nyDKOdvqKRK0eJrRPFtUbS-TZ4-TCVA" alt="Đội ngũ kỹ thuật viên chuyên nghiệp đang làm việc">
+            <div class="image-overlay">
+                <div class="overlay-content">
+                    <h3>Dịch vụ của chúng tôi</h3>
+                    <p>Dịch vụ sửa chữa và bảo trì nhà cửa chuyên nghiệp cho mọi nhu cầu của bạn</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Dịch vụ chúng tôi cung cấp</h2>
+                <p>Chúng tôi cung cấp một loạt các dịch vụ sửa chữa và bảo trì nhà cửa chuyên nghiệp để giữ cho ngôi nhà của bạn luôn trong tình trạng hoàn hảo.</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://cdn2.system1.com/eyJidWNrZXQiOiJvbS1wdWItc3RvcmFnZSIsImtleSI6IndhbGxldGdlbml1cy93cC1jb250ZW50L3VwbG9hZHMvMjAyMi8wNS9zaHV0dGVyc3RvY2tfNjI3OTg0ODQ4LmpwZyIsImVkaXRzIjp7IndlYnAiOnsicXVhbGl0eSI6NDB9fX0=" alt="Dịch vụ sửa chữa điện">
+                    </div>
+                    <div class="service-content">
+                        <h3>Sửa chữa điện</h3>
+                        <p>Các thợ điện được cấp phép của chúng tôi có thể xử lý mọi thứ từ sửa chữa nhỏ đến lắp đặt hệ thống điện hoàn chỉnh. Chúng tôi đảm bảo tất cả công việc điện đều đạt tiêu chuẩn và an toàn cho ngôi nhà của bạn.</p>
+                        <ul>
+                            <li>Sửa ổ cắm, công tắc bị hỏng</li>
+                            <li>Thay bóng đèn, đèn LED</li>
+                            <li>Sửa chập điện, mất điện cục bộ</li>
+                            <li>Đi dây điện mới (trong nhà)</li>
+                            <li>Kiểm tra & sửa CB, aptomat</li>
+                            <li>Thi công điện âm tường</li>
+                            <li>Sửa quạt điện, máy nước nóng</li>
+                            <li>Kiểm tra rò điện, đo tải</li>
+
+                        </ul>
+                    </div>
+                    <div class="service-button">
+                        <a href="#booking-section" class="btn btn-secondary" onclick="preSelectService('electrical')">Đặt ngay</a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://www.build-review.com/wp-content/uploads/2021/03/Plumbing.jpg" alt="Dịch vụ sửa chữa ống nước">
+                    </div>
+                    <div class="service-content">
+                        <h3>Sửa chữa ống nước</h3>
+                        <p>Từ vòi nước bị rò rỉ đến thay thế đường ống, các thợ sửa ống nước chuyên nghiệp của chúng tôi cung cấp dịch vụ nhanh chóng, đáng tin cậy để khắc phục mọi vấn đề về ống nước trong nhà bạn.</p>
+                        <ul>
+                            <li>Sửa vòi nước rò rỉ</li>
+                            <li>Thông nghẹt bồn rửa, lavabo</li>
+                            <li>Lắp đặt máy nước nóng</li>
+                            <li>Thay ống nước bị bể</li>
+                            <li>Sửa bồn cầu rò rỉ</li>
+                        </ul>
+                    </div>
+                    <div class="service-button">
+                        <a href="#booking-section" class="btn btn-secondary" onclick="preSelectService('plumbing')">Đặt ngay</a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://t3.ftcdn.net/jpg/03/93/83/32/360_F_393833200_rlqHHBoOP0M1vDsmq2o48LlWkyO4MRa4.jpg" alt="Dịch vụ điện lạnh">
+                    </div>
+                    <div class="service-content">
+                        <h3>Điện lạnh</h3>
+                        <p>Các kỹ thuật viên được chứng nhận của chúng tôi chuyên về cả hệ thống điện và làm lạnh, cung cấp các giải pháp toàn diện để giữ cho ngôi nhà hoặc doanh nghiệp của bạn hoạt động trơn tru.</p>
+                        <ul>
+                            <li>Sửa máy lạnh không lạnh, chảy nước</li>
+                            <li>Bơm gas, vệ sinh máy lạnh</li>
+                            <li>Sửa tủ lạnh không làm lạnh</li>
+                            <li>Thay block, quạt tủ lạnh</li>
+                            <li>Sửa máy giặt không hoạt động</li>
+                            <li>Kiểm tra và thay tụ điện, board mạch</li>
+                            <li>Lắp đặt máy lạnh, máy giặt, tủ lạnh</li>
+                            <li>Sửa máy nước nóng lạnh không hoạt động</li>
+
+                        </ul>
+                    </div>
+                    <div class="service-button">
+                        <a href="#booking-section" class="btn btn-secondary" onclick="preSelectService('electro')">Đặt ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="about-page" class="page-content">
+    <section class="hero">
+        <div class="image-with-overlay">
+            <img src="https://lh3.googleusercontent.com/KqNtDg6qsDIqjPmfsICJnmWJQPO8SUACkdkyh-C2rNW61L-ByQhA6yi-Z0jOUf7eGG2nyDKOdvqKRK0eJrRPFtUbS-TZ4-TCVA" alt="Đội ngũ kỹ thuật viên chuyên nghiệp đang làm việc">
+            <div class="image-overlay">
+                <div class="overlay-content">
+                    <h1>Về HomeFix Pro</h1>
+                    <p>Đối tác đáng tin cậy của bạn cho mọi dịch vụ sửa chữa và bảo trì nhà cửa</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="/api/placeholder/600/400" alt="Đội ngũ của chúng tôi" width="100%" height="100%">
+                </div>
+                <div class="about-text">
+                    <h3>Chúng tôi là ai</h3>
+                    <p>HomeFix Pro được thành lập vào năm 2025 với sứ mệnh đơn giản: kết nối gia đình với các kỹ thuật viên đáng tin cậy, lành nghề cho mọi nhu cầu sửa chữa nhà cửa. Từ một dịch vụ địa phương nhỏ, chúng tôi đã phát triển thành một nền tảng đáng tin cậy phục vụ nhiều khu vực.</p>
+                    <p>Chúng tôi kiểm tra kỹ lưỡng tất cả các kỹ thuật viên trên nền tảng của mình, đảm bảo họ có giấy phép, bảo hiểm và kinh nghiệm phù hợp để cung cấp dịch vụ chất lượng cao. Quy trình lựa chọn nghiêm ngặt của chúng tôi đảm bảo rằng bạn có thể yên tâm khi biết rằng chỉ có những chuyên gia đủ tiêu chuẩn mới làm việc tại nhà bạn.</p>
+                    <p>Chúng tôi tin tưởng vào sự minh bạch, đáng tin cậy và xuất sắc trong mọi việc chúng tôi làm. Khi bạn đặt một kỹ thuật viên qua HomeFix Pro, bạn không chỉ nhận được một nhà cung cấp dịch vụ – bạn nhận được một đối tác quan tâm đến chất lượng công việc tại nhà bạn.</p>
+                </div>
+            </div>
+            
+            <div class="mission-vision">
+                <div class="section-title">
+                    <h2>Sứ mệnh, Tầm nhìn & Giá trị</h2>
+                    <p>Những nguyên tắc dẫn dắt công việc của chúng tôi</p>
+                </div>
+                
+                <div class="mission-vision-flex">
+                    <div class="mission-box">
+                        <h3>Sứ mệnh của chúng tôi</h3>
+                        <p>Cung cấp cho gia chủ quyền truy cập dễ dàng vào các dịch vụ sửa chữa nhà đáng tin cậy, lành nghề và giá cả phải chăng, đảm bảo mọi nhu cầu bảo trì nhà cửa đều được đáp ứng với sự chuyên nghiệp và tận tâm.</p>
+                        <p>Chúng tôi nỗ lực tạo ra một nền tảng nơi các kỹ thuật viên chất lượng có thể kết nối với khách hàng đánh giá cao chuyên môn của họ, xây dựng mối quan hệ lâu dài dựa trên sự tin tưởng và dịch vụ xuất sắc.</p>
+                    </div>
+                    
+                    <div class="vision-box">
+                        <h3>Tầm nhìn của chúng tôi</h3>
+                        <p>Trở thành nền tảng dịch vụ nhà cửa đáng tin cậy nhất trên toàn quốc, cách mạng hóa cách mọi người duy trì và cải thiện ngôi nhà của họ bằng cách làm cho sự trợ giúp chuyên nghiệp trở nên dễ tiếp cận với tất cả mọi người.</p>
+                        <p>Chúng tôi hình dung một tương lai nơi gia chủ có thể tự tin giải quyết mọi thách thức sửa chữa nhà chỉ với vài cú nhấp chuột, biết rằng họ sẽ nhận được dịch vụ nhanh chóng, chất lượng cao mỗi lần.</p>
+                    </div>
+                    
+                    <div class="values-box">
+                        <h3>Giá trị của chúng tôi</h3>
+                        <p>Tại HomeFix Pro, các giá trị cốt lõi thúc đẩy mọi việc chúng tôi làm. Chúng tôi tin vào sự chính trực trong mọi tương tác, sự xuất sắc trong chất lượng dịch vụ và xây dựng mối quan hệ lâu dài với khách hàng và kỹ thuật viên.</p>
+                        <p>Chúng tôi cam kết cải tiến liên tục, đón nhận sự đổi mới để làm cho việc sửa chữa nhà trở nên dễ dàng và dễ tiếp cận hơn cho mọi người.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="core-values">
+                <div class="section-title">
+                    <h2>Giá trị cốt lõi</h2>
+                    <p>Những nguyên tắc định hướng văn hóa và dịch vụ của chúng tôi</p>
+                </div>
+                
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">💼</div>
+                        <h4>Chuyên nghiệp</h4>
+                        <p>Chúng tôi duy trì các tiêu chuẩn chuyên nghiệp cao nhất trong mỗi dịch vụ mà chúng tôi cung cấp, đảm bảo các kỹ thuật viên của chúng tôi lành nghề và lịch sự.</p>
+                    </div>
+                    
+                    <div class="value-card">
+                        <div class="value-icon">⭐</div>
+                        <h4>Xuất sắc</h4>
+                        <p>Chúng tôi phấn đấu đạt được sự xuất sắc trong mọi công việc sửa chữa và dịch vụ, vượt qua mong đợi của khách hàng.</p>
+                    </div>
+                    
+                    <div class="value-card">
+                        <div class="value-icon">🤝</div>
+                        <h4>Chính trực</h4>
+                        <p>Chúng tôi hành động với sự trung thực và minh bạch trong mọi giao dịch, xây dựng niềm tin thông qua dịch vụ đáng tin cậy và giá cả công bằng.</p>
+                    </div>
+                    
+                    <div class="value-card">
+                        <div class="value-icon">⏱️</div>
+                        <h4>Đáng tin cậy</h4>
+                        <p>Chúng tôi đến đúng giờ và hoàn thành công việc như đã hứa, tôn trọng lịch trình và cam kết của khách hàng.</p>
+                    </div>
+                    
+                    <div class="value-card">
+                        <div class="value-icon">🔄</div>
+                        <h4>Trách nhiệm</h4>
+                        <p>Chúng tôi chịu trách nhiệm về công việc của mình và đứng sau các dịch vụ của chúng tôi với cam kết hài lòng.</p>
+                    </div>
+                    
+                    <div class="value-card">
+                        <div class="value-icon">💡</div>
+                        <h4>Đổi mới</h4>
+                        <p>Chúng tôi không ngừng tìm kiếm các cách tốt hơn để phục vụ khách hàng thông qua công nghệ mới và quy trình cải tiến.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h3>HomeFix Pro</h3>
+                <p>Đối tác đáng tin cậy của bạn cho các dịch vụ sửa chữa nhà chuyên nghiệp. Chất lượng công việc được đảm bảo.</p>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Liên kết nhanh</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showPage('home-page')">Trang chủ</a></li>
+                    <li><a href="#" onclick="showPage('about-page')">Về chúng tôi</a></li>
+                    <li><a href="#" onclick="showPage('services-page')">Dịch vụ</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Dịch vụ</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showPage('services-page'); preSelectService('electrical')">Sửa chữa điện</a></li>
+                    <li><a href="#" onclick="showPage('services-page'); preSelectService('plumbing')">Sửa chữa ống nước</a></li>
+                    <li><a href="#" onclick="showPage('services-page'); preSelectService('ac')">Điện lạnh</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Liên hệ</h3>
+                <ul class="footer-links">
+                    <li>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="28">[email protected]</a></li>
+                    <li>Điện thoại: (+84) 0825 123 456</li>
+                    <li>Địa chỉ: 15 Đường D5, Quận Bình Thạnh, Thành phố Hồ Chí Minh</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>© 2025 HomeFix Pro. Mọi quyền được bảo lưu.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+            var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+            var firstSheetName = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[firstSheetName];
+
+            var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+            var filteredData = jsonData.filter(row => row.some(filledCell));
+
+            var headerRowIndex = filteredData.findIndex((row, index) =>
+              row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+            );
+            if (headerRowIndex === -1 || headerRowIndex > 25) {
+              headerRowIndex = 0;
+            }
+
+            var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+            csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+            return csv;
+        } catch (e) {
+            console.error(e);
+            return "";
+        }
+    }
+    return gk_fileData[filename] || "";
+    }
+</script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+    const detailedServices = {
+        electrical: [
+            { service: "Sửa ổ cắm, công tắc bị hỏng", basePrice: 80000, notes: "Thay mới tính thêm 20.000–50.000" },
+            { service: "Thay bóng đèn, đèn LED", basePrice: 50000, notes: "Chưa bao gồm bóng" },
+            { service: "Sửa chập điện, mất điện cục bộ", basePrice: 150000, notes: "Tùy mức độ và khu vực" },
+            { service: "Đi dây điện mới (trong nhà)", basePrice: 200000, notes: "Tùy diện tích, độ khó" },
+            { service: "Kiểm tra & sửa CB, aptomat", basePrice: 100000, notes: "Thay mới + vật tư tính riêng" },
+            { service: "Thi công điện âm tường", basePrice: 500000, notes: "Tùy độ dài, độ phức tạp" },
+            { service: "Sửa quạt điện, máy nước nóng", basePrice: 150000, notes: "Máy lỗi nặng có thể cao hơn" },
+            { service: "Kiểm tra rò điện, đo tải", basePrice: 100000, notes: "Có thiết bị chuyên dụng" },
+            { service: "Dịch vụ sửa điện theo yêu cầu", basePrice: 0, notes: "Có thể báo giá sau khi khảo sát" }
+        ],
+        plumbing: [
+            { service: "Sửa vòi nước rò rỉ", basePrice: 100000, notes: "Thay mới tính thêm phí vật tư" },
+            { service: "Thông tắc bồn rửa, lavabo", basePrice: 150000, notes: "Tùy mức độ nghẹt" },
+            { service: "Lắp đặt máy nước nóng", basePrice: 300000, notes: "Chưa bao gồm máy" },
+            { service: "Thay ống nước bị bể", basePrice: 200000, notes: "Tùy độ dài và vị trí" },
+            { service: "Sửa bồn cầu rò rỉ", basePrice: 150000, notes: "Thay linh kiện tính riêng" }
+        ],
+        electro: [
+            { service: "Sửa máy lạnh không lạnh, chảy nước", basePrice: 150000, notes: "Có thể phát sinh nếu thiếu gas hoặc hư block" },
+            { service: "Bơm gas, vệ sinh máy lạnh", basePrice: 200000, notes: "Giá tuỳ loại gas và công suất máy" },
+            { service: "Sửa tủ lạnh không làm lạnh", basePrice: 180000, notes: "Tuỳ lỗi block, xả tuyết hay cảm biến" },
+            { service: "Thay block, quạt tủ lạnh", basePrice: 300000, notes: "Chi phí chưa bao gồm vật tư" },
+            { service: "Sửa máy giặt không hoạt động", basePrice: 150000, notes: "Lỗi nhẹ, chưa gồm linh kiện nếu thay" },
+            { service: "Kiểm tra và thay tụ điện, board mạch", basePrice: 120000, notes: "Giá chưa bao gồm linh kiện" },
+            { service: "Lắp đặt máy lạnh, máy giặt, tủ lạnh", basePrice: 250000, notes: "Tuỳ loại thiết bị và vị trí lắp" },
+            { service: "Sửa máy nước nóng lạnh không hoạt động", basePrice: 160000, notes: "Tuỳ lỗi điện trở, bo mạch, đường nước" },
+            { service: "Dịch vụ điện lạnh theo yêu cầu", basePrice: 0, notes: "Báo giá sau khi khảo sát thực tế" }
+        ]
+    };
+
+    const technicians = [
+        {
+            id: 1,
+            name: "Nguyễn Văn Minh",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 10,
+            services: "Sửa chữa điện",
+            rating: 4.8,
+            district: "district1",
+            specialties: ["electrical"],
+            priceAdjustment: 1.2,
+            bio: "Minh là một thợ điện bậc thầy được chứng nhận với hơn 10 năm kinh nghiệm trong dịch vụ điện dân dụng và thương mại. Anh chuyên về nâng cấp bảng điện, lắp đặt đèn chiếu sáng và xử lý các vấn đề điện phức tạp.",
+            reviews: [
+                { name: "Trần Thị Hương", date: "15/04/2025", rating: 5, comment: "Anh Minh rất chuyên nghiệp và sửa chữa hệ thống điện nhà tôi nhanh chóng. Rất đáng tin cậy!" },
+                { name: "Đỗ Văn Đức", date: "22/03/2025", rating: 4, comment: "Dịch vụ tốt, đến đúng giờ và hoàn thành công việc hiệu quả." }
+            ]
+        },
+        {
+            id: 2,
+            name: "Lê Thanh Tùng",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 2,
+            services: "Sửa chữa ống nước",
+            rating: 4.6,
+            district: "district1",
+            specialties: ["plumbing"],
+            priceAdjustment: 1.0,
+            bio: "Tùng là một thợ sửa ống nước được cấp phép, chuyên về sửa chữa và lắp đặt ống nước dân dụng. Chuyên môn của anh bao gồm sửa chữa rò rỉ, thông cống, lắp đặt thiết bị vệ sinh và thay thế máy nước nóng.",
+            reviews: [
+                { name: "Phạm Văn Thành", date: "28/04/2025", rating: 5, comment: "Anh Tùng sửa ống nước bị rò rỉ nhanh chóng và chuyên nghiệp. Giá cả hợp lý!" },
+                { name: "Nguyễn Thị Mai", date: "02/04/2025", rating: 4, comment: "Rất am hiểu và giải thích mọi thứ rõ ràng. Sẽ sử dụng dịch vụ lần sau." }
+            ]
+        },
+        {
+            id: 3,
+            name: "Nguyễn Văn Tài",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 6,
+            services: "Điện lạnh",
+            rating: 4.9,
+            district: "districtTBinh",
+            specialties: ["electro"],
+            priceAdjustment: 1.15,
+            bio: "Tài là một kỹ thuật viên điện lạnh với kinh nghiệm vững chắc trong việc xử lý rò rỉ máy lạnh, hỏng động cơ và thực hiện bảo trì định kỳ. Anh được biết đến với sự đúng giờ và chẩn đoán kỹ lưỡng.",
+            reviews: [
+                { name: "Vũ Thị Lan", date: "10/04/2025", rating: 5, comment: "Anh Tài sửa máy lạnh rất nhanh chóng, không phát sinh chi phí ngoài dự kiến. Rất hài lòng với thái độ làm việc chuyên nghiệp." },
+                { name: "Hoàng Văn Nam", date: "15/03/2025", rating: 5, comment: "Máy lạnh của mình chảy nước lâu ngày, anh Tài tới kiểm tra kỹ và sửa triệt để. Giá cả cũng hợp lý, chỉ trừ 1 sao vì đến trễ 15 phút." }
+            ]
+        },
+        {
+            id: 4,
+            name: "Phan Đình Hải",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 6,
+            services: "Điện lạnh",
+            rating: 4.7,
+            district: "district1",
+            specialties: ["ac"],
+            priceAdjustment: 1.1,
+            bio: "Hải là một kỹ thuật viên HVAC được chứng nhận với chuyên môn về lắp đặt, bảo trì và sửa chữa máy lạnh.",
+            reviews: [
+                { name: "Trịnh Thị Hằng", date: "22/04/2025", rating: 5, comment: "Anh Hải bảo dưỡng điều hòa của chúng tôi và nó chạy tốt hơn bao giờ hết. Rất tỉ mỉ!" },
+                { name: "Đặng Văn Tuyến", date: "30/03/2025", rating: 4, comment: "Dịch vụ chuyên nghiệp và các mẹo bảo trì hữu ích. Đề xuất cao." }
+            ]
+        },
+        {
+            id: 5,
+            name: "Vũ Đình Long",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 5,
+            services: "Điện lạnh",
+            rating: 4.5,
+            district: "district8",
+            specialties: ["electro"],
+            priceAdjustment: 1.05,
+            bio: "Long có kinh nghiệm trong việc sửa chữa các thiết bị điện lạnh như máy giặt, máy nước nóng và tủ lạnh nhỏ. Anh thân thiện và đưa ra lời khuyên rõ ràng, trung thực.",
+            reviews: [
+                { name: "Đinh Thu Hà", date: "18/04/2025", rating: 4, comment: "Máy giặt bị đứng trống giữa chừng, anh Cường tới kiểm tra kỹ và sửa trong vòng 30 phút. Giá hợp lý, chỉ thiếu linh kiện phải chờ nên trừ 1 sao." },
+                { name: "Ngô Văn Khánh", date: "25/03/2025", rating: 5, comment: "Tận tình, hỗ trợ mình cả buổi tối do máy hư đột ngột. Rất biết ơn anh Cường!" }
+            ]
+        },
+        {
+            id: 6,
+            name: "Trần Minh Mẫn",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 4,
+            services: "Sửa chữa điện",
+            rating: 4.6,
+            district: "district10",
+            specialties: ["electrical"],
+            priceAdjustment: 1.0,
+            bio: "Mẫn là một thợ điện được chứng nhận với kinh nghiệm trong các dịch vụ điện dân dụng.",
+            reviews: [
+                { name: "Phạm Văn Thành", date: "28/04/2025", rating: 5, comment: "Anh Mẫn sửa điện nhanh chóng và chuyên nghiệp." },
+                { name: "Nguyễn Thị Mai", date: "02/04/2025", rating: 4, comment: "Rất am hiểu và giải thích mọi thứ rõ ràng." }
+            ]
+        },
+        {
+            id: 7,
+            name: "Nguyễn Văn Bình",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 7,
+            services: "Sửa chữa ống nước",
+            rating: 4.3,
+            district: "districtTDuc",
+            specialties: ["plumbing"],
+            priceAdjustment: 1.05,
+            bio: "Bình là một thợ sửa ống nước có kinh nghiệm, chuyên sửa chữa rò rỉ và lắp đặt thiết bị vệ sinh.",
+            reviews: [
+                { name: "Phạm Tuấn Kiệt", date: "23/04/2025", rating: 5, comment: "Anh Bình sửa ống nước nhanh và chuyên nghiệp." },
+                { name: "Đỗ Văn Đức", date: "03/03/2025", rating: 4, comment: "Dịch vụ tốt, đến đúng giờ." }
+            ]
+        },
+        {
+            id: 8,
+            name: "Trần Mỹ Duyên",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 6,
+            services: "Điện lạnh",
+            rating: 4.9,
+            district: "districtPNhuan",
+            specialties: ["electro"],
+            priceAdjustment: 1.15,
+            bio: "Duyên đã làm việc trong lĩnh vực điện lạnh hơn sáu năm, nổi bật trong việc bảo trì dân dụng và thương mại nhỏ. Chị đặc biệt được tin tưởng trong việc vệ sinh máy lạnh và bơm gas.",
+            reviews: [
+                { name: "Ngô Hải Yến", date: "30/03/2025", rating: 5, comment: "Chị Duyên vệ sinh máy lạnh rất kỹ càng, sau khi làm xong máy chạy êm và mát hơn hẳn. Phục vụ rất dễ chịu, đáng tin cậy." },
+                { name: "Trần Bảo Khanh", date: "12/03/2025", rating: 5, comment: "Rất chuyên nghiệp, tới đúng giờ và làm việc gọn gàng. Chị còn tư vấn cách sử dụng để tiết kiệm điện." }
+            ]
+        },
+        {
+            id: 9,
+            name: "Lê Văn Hùng",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 3,
+            services: "Sửa chữa điện",
+            rating: 4.4,
+            district: "district3",
+            specialties: ["electrical"],
+            priceAdjustment: 1.0,
+            bio: "Hùng là một thợ điện tập trung vào sửa chữa và lắp đặt dân dụng.",
+            reviews: [
+                { name: "Nguyễn Thị Lan", date: "10/04/2025", rating: 4, comment: "Anh Hùng làm việc ổn, giá cả hợp lý." },
+                { name: "Hoàng Văn Nam", date: "15/03/2025", rating: 5, comment: "Rất hài lòng với dịch vụ." }
+            ]
+        },
+        {
+            id: 10,
+            name: "Phạm Quốc Anh",
+            image: "https://cdn-icons-png.freepik.com/512/6008/6008806.png",
+            experience: 5,
+            services: "Điện lạnh",
+            rating: 4.6,
+            district: "districtBThanh",
+            specialties: ["electro"],
+            priceAdjustment: 1.05,
+            bio: "Anh là một kỹ thuật viên HVAC được chứng nhận, chuyên về bảo trì và sửa chữa máy lạnh.",
+            reviews: [
+                { name: "Trần Thị Hằng", date: "20/04/2025", rating: 5, comment: "Máy lạnh chạy tốt sau khi được bảo dưỡng." },
+                { name: "Đặng Văn Tuyến", date: "25/03/2025", rating: 4, comment: "Dịch vụ tốt, rất chuyên nghiệp." }
+            ]
+        }
+    ];
+
+    let selectedTechnician = null;
+    let selectedDetailedService = null;
+
+    function showPage(pageId) {
+        const pages = document.querySelectorAll('.page-content');
+        pages.forEach(page => {
+            page.style.display = 'none';
+        });
+        
+        document.getElementById(pageId).style.display = 'block';
+
+        const navLinks = document.querySelectorAll('.nav-links a');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('onclick').includes(pageId)) {
+                link.classList.add('active');
+            }
+        });
+        
+        window.scrollTo(0, 0);
+    }
+    
+    function preSelectService(serviceType) {
+        showPage('home-page');
+        
+        setTimeout(() => {
+            document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' });
+            
+            document.getElementById('service-type').value = serviceType;
+            updateDetailedServices();
+        }, 100);
+    }
+
+    function updateDetailedServices() {
+        const serviceType = document.getElementById('service-type').value;
+        const detailedServiceSelect = document.getElementById('detailed-service');
+        
+        detailedServiceSelect.innerHTML = '<option value="" selected disabled>Chọn dịch vụ chi tiết</option>';
+        
+        if (serviceType && detailedServices[serviceType]) {
+            detailedServices[serviceType].forEach(item => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify(item);
+                option.textContent = item.service;
+                detailedServiceSelect.appendChild(option);
+            });
+        }
+        
+        selectedDetailedService = null;
+    }
+
+    function selectDetailedService() {
+        const detailedServiceSelect = document.getElementById('detailed-service');
+        const selectedValue = detailedServiceSelect.value;
+        
+        if (selectedValue) {
+            selectedDetailedService = JSON.parse(selectedValue);
+            showAlert(`Dịch vụ đã chọn: ${selectedDetailedService.service}. Giá sẽ được xác nhận sau khi chọn kỹ thuật viên.`, 'success');
+        } else {
+            selectedDetailedService = null;
+        }
+    }
+    
+    function adjustPrice(basePrice, adjustmentFactor) {
+        if (basePrice === 0) return "Thoả thuận";
+        const adjusted = Math.round(basePrice * adjustmentFactor);
+        if (basePrice >= 1000000) {
+            return `${(adjusted / 1000000).toFixed(1)} triệu VNĐ`;
+        }
+        return `${adjusted.toLocaleString('vi-VN')} VNĐ`;
+    }
+
+    function findTechnicians() {
+        const serviceType = document.getElementById('service-type').value;
+        const district = document.getElementById('district').value;
+        
+        if (!serviceType || !district) {
+            showAlert('Vui lòng chọn cả loại dịch vụ và khu vực', 'warning');
+            return;
+        }
+
+        if (!selectedDetailedService) {
+            showAlert('Vui lòng chọn dịch vụ chi tiết', 'warning');
+            return;
+        }
+        
+        const filteredTechnicians = technicians.filter(tech => 
+            tech.specialties.includes(serviceType) && tech.district === district
+        );
+        
+        const technicianList = document.getElementById('technician-list');
+        technicianList.style.display = 'block';
+        
+        document.getElementById('technician-detail').style.display = 'none';
+        document.getElementById('booking-form').style.display = 'none';
+        
+        const resultsContainer = technicianList.querySelector('h3 + div') || document.createElement('div');
+        if (!technicianList.querySelector('h3 + div')) {
+            technicianList.appendChild(resultsContainer);
+        } else {
+            resultsContainer.innerHTML = '';
+        }
+        
+        if (filteredTechnicians.length === 0) {
+            resultsContainer.innerHTML = '<p>Không tìm thấy kỹ thuật viên nào cho lựa chọn của bạn. Vui lòng thử các tiêu chí khác.</p>';
+            return;
+        }
+        
+        filteredTechnicians.forEach(tech => {
+            const adjustedPrice = adjustPrice(selectedDetailedService.basePrice, tech.priceAdjustment);
+            const techCard = document.createElement('div');
+            techCard.className = 'technician-card';
+            techCard.innerHTML = `
+                <img src="${tech.image}" alt="${tech.name}" class="technician-img">
+                <div class="technician-info">
+                    <h3 class="technician-name">${tech.name}</h3>
+                    <p class="technician-experience">${tech.experience} năm kinh nghiệm</p>
+                    <p class="technician-services">Dịch vụ: ${tech.services}</p>
+                    <p class="technician-rating">Đánh giá: ${tech.rating} 
+                        ${'★'.repeat(Math.floor(tech.rating))}${tech.rating % 1 >= 0.5 ? '½' : ''}
+                    </p>
+                    <div class="price-highlight">Giá cho ${selectedDetailedService.service}: ${adjustedPrice}</div>
+                </div>
+                <button class="btn btn-secondary" onclick="viewTechnician(${tech.id})">Xem chi tiết</button>
+            `;
+            resultsContainer.appendChild(techCard);
+        });
+        
+        technicianList.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function viewTechnician(techId) {
+        const tech = technicians.find(t => t.id === techId);
+        if (!tech) return;
+    
+        selectedTechnician = tech;
+        const adjustedPrice = adjustPrice(selectedDetailedService.basePrice, tech.priceAdjustment);
+    
+        const detailContainer = document.getElementById('technician-detail');
+        detailContainer.style.display = 'block';
+    
+        detailContainer.innerHTML = `
+            <div class="technician-detail-header">
+                <img src="${tech.image}" alt="${tech.name}" class="technician-detail-img">
+                <div class="technician-detail-title">
+                    <h3>${tech.name}</h3>
+                    <p>${tech.experience} năm kinh nghiệm</p>
+                    <p class="technician-rating">
+                        ${tech.rating} ${'★'.repeat(Math.floor(tech.rating))}${tech.rating % 1 >= 0.5 ? '½' : ''}
+                    </p>
+                </div>
+            </div>
+            <div class="technician-detail-body">
+                <div class="technician-detail-section">
+                    <h4>Giới thiệu</h4>
+                    <p>${tech.bio}</p>
+                </div>
+                <div class="technician-detail-section">
+                    <h4>Dịch vụ</h4>
+                    <p>${tech.services}</p>
+                </div>
+                <div class="technician-detail-section">
+                    <h4>Dịch vụ đã chọn</h4>
+                    <div class="price-highlight">${selectedDetailedService.service}: ${adjustedPrice}</div>
+                    <p>Ghi chú: ${selectedDetailedService.notes}</p>
+                </div>
+                <div class="technician-detail-section">
+                    <h4>Đánh giá khách hàng</h4>
+                    ${tech.reviews.map(review => `
+                        <div class="technician-review">
+                            <div class="technician-review-header">
+                                <span class="technician-review-name">${review.name}</span>
+                                <span class="technician-review-date">${review.date}</span>
+                            </div>
+                            <div class="technician-rating">
+                                ${review.rating} ${'★'.repeat(review.rating)}
+                            </div>
+                            <p>${review.comment}</p>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="technician-cta">
+                    <button class="btn btn-primary" onclick="showBookingForm()">Đặt kỹ thuật viên</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('technician-detail').style.display = 'none'">Quay lại kết quả</button>
+                </div>
+            </div>
+        `;
+    
+        detailContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function showBookingForm() {
+        document.getElementById('booking-form').style.display = 'block';
+        document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function completeBooking() {
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        
+        if (!name || !phone || !address || !date || !time) {
+            showAlert('Vui lòng điền đầy đủ các trường bắt buộc', 'warning');
+            return;
+        }
+        
+        const adjustedPrice = adjustPrice(selectedDetailedService.basePrice, selectedTechnician.priceAdjustment);
+        
+        document.getElementById('booking-form').style.display = 'none';
+        document.getElementById('technician-detail').style.display = 'none';
+        document.getElementById('technician-list').style.display = 'none';
+        
+        document.getElementById('service-form').reset();
+        document.getElementById('contact-form').reset();
+        
+        showAlert(`Đặt lịch thành công! Kỹ thuật viên ${selectedTechnician.name} sẽ thực hiện dịch vụ ${selectedDetailedService.service} với giá ${adjustedPrice} vào ${formatDate(date)} trong khung giờ ${getTimeSlot(time)}. Chúng tôi sẽ gửi xác nhận qua số điện thoại của bạn.`, 'success');
+        
+        document.getElementById('alert-container').scrollIntoView({ behavior: 'smooth' });
+        
+        selectedTechnician = null;
+        selectedDetailedService = null;
+        updateDetailedServices();
+    }
+
+    function getTimeSlot(timeCode) {
+        const timeSlots = {
+            'morning': 'Sáng (8:00 - 12:00)',
+            'afternoon': 'Chiều (12:00 - 16:00)',
+            'evening': 'Tối (16:00 - 20:00)'
+        };
+        return timeSlots[timeCode] || timeCode;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        return date.toLocaleDateString('vi-VN', options);
+    }
+    
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.innerHTML = message;
+        
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.5s';
+            setTimeout(() => alert.remove(), 500);
+        }, 10000);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .alert {
+                transition: opacity 0.5s;
+            }
+            
+            .alert-info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93a722cbcedf6787',t:'MTc0NjM1MjY2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93bde5317fbc4509',t:'MTc0NjU5MTMxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
